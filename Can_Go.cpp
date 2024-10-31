@@ -1,67 +1,64 @@
 #include <bits/stdc++.h>
 using namespace std;
-const int N=1005;
-int n, m;
-char a[N][N];
-bool vis[N][N];
-vector<pair<int, int>> d = {{0, 1}, {0, -1}, {-1, 0}, {1, 0}};
 
-bool valid(int i, int j) {
-    if (i < 0 || i >= n || j < 0 || j >= m || a[i][j] == '#' || vis[i][j]) {
-        return false;
-    }
-    return true;
-}
+const int N = 1005;
+vector<pair<int, int>> adj[N];
+int dis[N];
 
-bool dfs(int si, int sj, int di, int dj) {
-    if (si == di && sj == dj) {
-        return true;
-    }
-    
-    vis[si][sj] = true;
-    
-    for (int i = 0; i < 4; i++) {
-        int ci = si + d[i].first;
-        int cj = sj + d[i].second;
-        
-        if (valid(ci, cj) && (a[ci][cj] == '.' || a[ci][cj] == 'B')) {
-            if (dfs(ci, cj, di, dj)) {
-                return true;
+void dijkstra(int src) {
+    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
+    pq.push({0, src});
+    dis[source] = 0;
+
+    while (!pq.empty()) {
+        int cost = pq.top().first;
+        int node = pq.top().second;
+        pq.pop();
+
+        if (cost > dis[node]) continue;
+
+        for (pair<int,int> edge : adj[node]) {
+            int childNode = edge.first;
+            int childCost = edge.second;
+
+            if (cost + childCost < dis[childNode]) {
+                dis[childNode] = cost + childCost;
+                pq.push({dis[childNode], childNode});
             }
         }
     }
-    return false;
 }
 
 int main() {
+    int n, m;
     cin >> n >> m;
-    
-    int ax = -1, ay = -1, bx = -1, by = -1;
-    
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < m; j++) {
-            cin >> a[i][j];
-            if (a[i][j] == 'A') {
-                ax = i;
-                ay = j;
-            } else if (a[i][j] == 'B') {
-                bx = i;
-                by = j;
-            }
-        }
+
+    for (int i = 1; i <= m; i++) {
+        int u, v, c;
+        cin >> u >> v >> c;
+        adj[u].push_back({v, c});
     }
 
-    if (ax == -1 || ay == -1 || bx == -1 || by == -1) {
-        cout << "NO" << endl;
-        return 0;
+    int src;
+    cin >> src;
+
+    for (int i = 1; i <= n; i++) {
+        dis[i] = INT_MAX;
     }
-    
-    memset(vis, false, sizeof(vis));
-    
-    if (dfs(ax, ay, bx, by)) {
-        cout << "YES" << endl;
-    } else {
-        cout << "NO" << endl;
+
+    dijkstra(src);
+
+    int t;
+    cin >> t;
+    while (t--) {
+        int des, cost;
+        cin >> des >> cost;
+
+        if (dis[des] <= cost) {
+            cout << "YES" << endl;
+        } else {
+            cout << "NO" << endl;
+        }
     }
     
     return 0;
